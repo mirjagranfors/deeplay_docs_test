@@ -1,324 +1,104 @@
-# Documentation Setup and Automation Guide
+Deeplay is a deep learning library in Python that extends PyTorch with additional functionalities focused on modularity and reusability.  Deeplay seeks to address the common issue of rigid and non-reusable modules in PyTorch projects by offering a system that allows for easy customization and optimization of neural network components. Specifically, it facilitates the definition, training, and adjustment of neural networks by introducing dynamic modification capabilities for model components after their initial creation.
 
-This guide explains how to set up and maintain documentation for your Python library in a dedicated `docs` branch with GitHub Pages. It also details how all the steps, once configured, are automated via a GitHub Actions workflow that updates and builds documentation upon new releases.
+# Core Philosophy
 
-For example, for the repository **https://"https://github.com/ORGANIZATION/REPO/** the corresponding GitHub documentation page will be **https://"https://ORGANIZATION.github.io/REPO/**.
+The core philosophy of Deeplay is to enhance flexibility in the construction and adaptation of neural networks. It is built on the observation that PyTorch modules often lack reusability across projects, leading to redundant implementations. Deeplay enables properties of neural network submodules to be changed post-creation, supporting seamless integration of these modifications. Its design is based on a hierarchy of abstractions from models down to layers, emphasizing compatibility and easy transformation of components. This can be summarized as follows:
 
-Key points:
-- **Dedicated `docs` branch**: The documentation is served from the `docs` folder on the `docs` branch, utilizing GitHub Pages (so that it's updated automatically in the GitHub page when this folder is changed through a push).
-- **Automated `.rst` File Generation**: A Python script (`generate_doc_markdown.py`) scans your codebase and generates the `.rst` files automatically.
-- **Sphinx & Extensions**: Use Sphinx, `sphinx-automodapi`, and `pydata-sphinx-theme` to build the docs.
-- **CI/CD with GitHub Actions**: Once set up, the provided GitHub Actions workflow automatically updates the documentation every time a new release of the repository is published.
+- **Enhance Flexibility:** Neural networks defined using Deeplay should be fully adaptable by the user, allowing dynamic modifications to model components. This should be possible without the author of the model having to anticipate all potential changes in advance.
+- **Promote Reusability:** Deeplay components should be immediately reusable across different projects and models. This reusability should extend to both the components themselves and the modifications made to them.
+- **Support Seamless Integration:** Modifications to model blocks and components should be possible without the user worrying about breaking the model's compatibility with other parts of the network. Deeplay should handle these integrations automatically as far as possible.
+- **Hierarchy of Abstractions:** Neural networks and deep learning are fundamentally hierarchical, with each level of abstraction being mostly agnostic to the details of the levels below it. An *application* should be agnostic to which model it uses, a *model* should be agnostic to the specifics of the components it uses, a *component* should be agnostic to the specifics of the blocks it uses, and a *block* should be agnostic to the specifics of the *layers* it uses . Deeplay reflects this hierarchy in its design.
 
-Logical flow of documentation updates:
-1. **Initial Setup**: Configure `docs` branch, Sphinx, and dependencies.
-2. **Automated `.rst` Generation**: Use `generate_doc_markdown.py` to generate `.rst` files from code.
-3. **Building Locally (if needed)**: `make html` to verify documentation locally.
-4. **Release Trigger**: On publishing a new release, the GitHub Actions workflow:
-   - Checks out `docs` branch and release code.
-   - Generates `.rst` files.
-   - Builds HTML docs.
-   - Deploys the updated docs to `docs/latest` and `docs/<version>`.
-5. **Automatic Deployment**: Changes are committed back to `docs` branch and served on GitHub Pages.
+# Deeplay Compared to Torch
 
-## 1. Create the `docs` Branch on GitHub
+Deeplay is designed as a superset of PyTorch, retaining compatibility with PyTorch code while introducing features aimed at improving modularity and customization. Unlike PyTorch's fixed module implementations, Deeplay provides a framework that supports dynamic adjustments to model architectures. This includes capabilities for on-the-fly property changes and a style registry for component customization. Users can easily transition between PyTorch and Deeplay, taking advantage of Deeplay's additional features without losing the familiarity and functionality of PyTorch.
 
-- Create a `docs` branch in your repository.
-- Go to the repository’s **Settings**.
-- Under **Pages**, configure the site to be served from the `docs/` folder on the `docs` branch.
+# Deeplay Compared to Lightning
 
-## 2. Clean the `docs` Branch
+While Deeplay utilizes PyTorch Lightning for simplifying the training loop process, it goes further by offering enhanced modularity for the architectural design of models. PyTorch Lightning focuses on streamlining and optimizing training operations, whereas Deeplay extends this convenience to the model construction phase. This integration offers users a comprehensive toolset for both designing flexible neural network architectures and efficiently managing their training, positioning Deeplay as a solution for more adaptive and intuitive neural network development.
 
-- In the `docs` branch, delete all files except for `.gitignore` (and of course `.git`).
-- The branch should now be nearly empty, ready for the documentation setup.
+# Quick Start Guide
 
-## 3. Configuring Sphinx
+The following quick start guide is intended for complete beginners to understand how to use Deeplay, from installation to training your first model. Let's get started!
 
-You need to perform the following steps checking out the `docs` branch of your repo.
+## Installation
 
-**Install Dependencies:**
-
+You can install Deeplay using pip:
 ```bash
-pip install sphinx sphinx-automodapi pydata-sphinx-theme
+pip install deeplay
 ```
-
-**Run `sphinx-quickstart`:**
-
+or
 ```bash
-sphinx-quickstart
+python -m pip install deeplay
 ```
+This will automatically install the required dependencies, including PyTorch and PyTorch Lightning. If a specific version of PyTorch is desired, it can be installed separately.
 
-If the command is not found:
+## Getting Started
 
-```bash
-python -m sphinx.cmd.quickstart
-```
+Here you find a series of notebooks that give you an overview of the core features of Deeplay and how to use them:
 
-This generates:
+- GS101 **[Understanding the Core Objects in Deeplay](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS101_core_objects.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS101_core_objects.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-- `conf.py` (Sphinx configuration file)
-- `Makefile`
-- `index.rst`
-- `make.bat`
+  Layers, Blocks, Components, Models, Applications.
 
-**Edit `conf.py`:**
+- GS111 **[Training Your First Model](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS111_first_model.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS111_first_model.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-- Add your code to `sys.path` so Sphinx can locate it:
-  
-  ```python
-  import sys
-  sys.path.insert(0, "release-code")
-  ```
+  Creating, training, saving and using a deep learning model with Deeplay.
 
-- Add code to get the release from enviroment variable:
-  
-  ```python
-  import os
+- GS121 **[Working with Deeplay Modules](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS121_modules.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS121_modules.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-  # get release from environment variable
-  version = os.environ.get("VERSION", "")
-  if not version:
-      print("Error: VERSION environment variable not set.")
-      sys.exit(1)
-  ```
+  Differences between Deeplay and PyTorch modules. How to create, build, and configure Deeplay modules.
 
-- Edit/Add the version number to appear in the title:
+- GS131 **[Using the Main Deeplay Methods](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS131_methods.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS131_methods.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-  ```python
-  release = version
-  ```
+  `Application.fit()`, `Application.test()`, `DeeplayModule.predict()`, `Trainer.fit()`.
 
-- Add required extensions:
+- GS141 **[Using Deeplay Applications](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS141_applications.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS141_applications.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-  ```python
-  extensions = ["sphinx_automodapi.automodapi", "sphinx.ext.githubpages"]
-  numpydoc_show_class_members = False
-  automodapi_inheritance_diagram = False
-  ```
+  Main Deeplay applications. Controlling loss functions, optimizers, and metrics. Training history. Callback.
 
-- Set the theme and options (change ORGANIZATION and REPO as needed):
+- GS151 **[Using Deeplay Models](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS151_models.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS151_models.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-  ```python
-  html_theme = "pydata_sphinx_theme"
-  html_static_path = ["_static"]
-  html_theme_options = {
-      "switcher": {
-          "json_url": "https://ORGANIZATION.github.io/REPO/latest/_static/switcher.json",
-          "version_match": version,
-      },
-      "navbar_end": [
-          "version-switcher",
-          "navbar-icon-links",
-      ],
-  }
-  ```
+  Main Deeplay models. Making a model. Weight initialization.
 
-**Create/edit `index.rst`:**
+- GS161 **[Using Deeplay Components](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS161_components.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS161_components.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-Place an `index.rst` file at the root of the `docs` branch:
+  Main Deeplay components.
 
-```rst
-.. yourproject documentation master file.
+- GS171 **[Using Deeplay Blocks](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS171_blocks.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS171_blocks.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-yourproject documentation
-=========================
+  Main Deeplay blocks. Adding, ordering, and removing layers. Operations.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+- GC181 **[Configuring Deeplay Objects](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS181_configure.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS181_configure.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-   src/Documentation
-```
+  `DeeplayModule.configure()` and selectors.
 
-## 4. Copy the File to Generate `.rst` Files with the Script
+- GC191 **[Using Styles](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS191_styles.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/getting-started/GS191_styles.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-Copy the Python script `generate_doc_markdown.py` to automate the `.rst` creation into the root folder of the `docs`branch.
+  Styles.
 
-> This will automate the `.rst` creation. It:
->
-> - Identifies top-level modules and packages in `release-code/<library_name>`.
-> - Generates `.rst` files for each module.
-> - Creates a `Documentation.rst` that acts as a table of contents.
-> 
-> **Usage:**
-> 
-> ```bash
-> python generate_doc_markdown.py <library_name> [--force] [--exclude=mod1,mod2,...] [--output-dir=src]
-> ```
-> 
-> **Arguments:**
-> 
-> - `<library_name>`: The name of your library (the folder under `release-code`).
-> - `--force` / `-f`: Overwrite existing `.rst` files if present.
-> - `--exclude` / `-e`: Exclude specific submodules from documentation.
-> - `--output-dir` / `-o`: Directory to write output files, default is `src`.
-> 
-> **Example:**
-> 
-> ```bash
-> python generate_doc_markdown.py deeplay --force --exclude=_internal --output-dir=src
-> ```
-> 
-> This command creates the `src` folder (if needed), generates `.rst` files for each module, and updates `Documentation.rst` automatically.
+## Advanced Topics
 
-## 5. Add the Version Switcher
+- AT201 **[Using Mappings as Inputs](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/advanced-topics/AT201_mappings.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/advanced-topics/AT201_mappings.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-Add the version switcher `switcher.json` to the folder `_static`of the `docs`branch.
+## Developer Tutorials
 
-```
-[]
-```
+Here you find a series of notebooks tailored for Deeplay's developers:
 
+- DT101 **[Deeplay File Structure](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT101_files.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT101_files.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-> The version switcher allows users to navigate between different versions of your documentation directly from the site’s navigation bar. This is handled by the switcher.json file, stored in _static/switcher.json, which follows a structure like:
-> 
-> ```
-> [
->   {
->     "name": "0.1.0",
->     "version": "0.1.0",
->     "url": "https://ORGANIZATION.github.io/REPO/0.1.0/"
->   }
-> ]
-> ```
-> 
-> How it works:
-> 
->     Each entry in switcher.json specifies a documentation version and the URL where it can be found.
->     The html_theme_options in conf.py references this file, enabling a dropdown menu to choose the version.
->     The GitHub Actions workflow updates switcher.json upon new releases by prepending the new version into this list. This ensures that the newly released version appears in the version switcher, and users can easily switch to it.
+- DT111 **[Style Guide](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT111_style.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT111_style.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-## 6. Ensure All Special Files Are Set Up in the `docs` Branch
+- DT121 **[Overview of Deeplay Classes](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT121_overview.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT121_overview.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-Ensure that all these files have been correctly prepared:
-- **`docs`** folder: Where documentation content and builds are hosted. This should include **index.html.** (to redirect to the `docs/latest` folder) and **.nojekyll** (to prevent GitHub Pages from ignoring _static and other files that begin with an underscore).
-- **`index.rst`**: Root documentation file linking to `Documentation.rst`.
-- **`conf.py`**: Sphinx configuration file where you set up paths, extensions, and themes.
-- **`generate_doc_markdown.py`**: Automation script that eliminates the need for manual `.rst` creation.
-- **`doc_requirements.txt`**: Lists the dependencies (Sphinx, sphinx-automodapi, pydata-sphinx-theme, etc.) needed to build documentation.
-- **`Makefile`**: Provides convenient commands (`make html`) to build the docs locally.
-- **`_static/switcher.json`**: Used for version switching within the docs (managed by the workflow).
-- **`README.md`**: Copy this readme file as well into the `docs`branch.
+- DT131 **[Deeplay Applications](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT131_applications.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT131_applications.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-## 7. Add Worflow for Automated Documentation on Release
+- DT141 **[Deeplay Models](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT141_models.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT141_models.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-Add the `docs.yml` to the `.github/workflows/docs.yml` folder of the branch of your project from which the release will be made.
+- DT151 **[Deeplay Components](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT151_components.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT151_components.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-In the code below, ensure that PYTHON_PACKAGE, ORGANIZATON and REPO are the correct ones. Other minor changes might be needed (e.g., Python version).
+- DT161 **[Deeplay Operations](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT151_operations.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT151_operations.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-> This workflow:
-> 
-> 1. Checks out the `docs` branch.
-> 2. Sets up Python and installs dependencies from `requirements.txt`.
-> 3. Checks out the release code (tag specified by the release event) into `release-code`.
-> 4. Runs the `generate_doc_markdown.py` script to generate/update `.rst` files.
-> 5. Builds the Sphinx documentation.
-> 6. Copies the built HTML files to `docs/latest` and `docs/{version}` directories.
-> 7. Commits and pushes these changes back to the `docs` branch, updating the live documentation on GitHub Pages.
-> 
-> **Example Workflow (in `.github/workflows/docs.yml`):**
-> 
-> ```yaml
-> name: Update Documentation
-> 
-> on:
->   release:
->     types:
->       - published
->   workflow_dispatch:
->     inputs:
->       test_tag:
->         description: "Release tag to simulate"
->         required: true
-> 
-> jobs:
->   update-docs:
->     name: Update Documentation
->     runs-on: ubuntu-latest
-> 
->     steps:
->       # Step 1: Check out the docs branch
->       - name: Checkout docs branch
->         uses: actions/checkout@v3
->         with:
->           ref: docs
-> 
->       # Step 2: Set up Python
->       - name: Set up Python
->         uses: actions/setup-python@v4
->         with:
->           python-version: "3.9"
-> 
->       # Step 3: Install dependencies
->       - name: Install dependencies
->         run: |
->           python -m pip install --upgrade pip
->           pip install -r doc_requirements.txt
-> 
->       # Step 4: Pull the release code into a separate directory
->       - name: Checkout release code
->         uses: actions/checkout@v3
->         with:
->           path: release-code
->           # Use the test tag from workflow_dispatch or the actual release tag
->           ref: ${{ github.event.inputs.test_tag || github.event.release.tag_name }}
-> 
->       - name: Install the package
->         run: |
->           cd release-code
->           pip install -e .
-> 
->       - name: Create the markdown files
->         run: |
->           python generate_doc_markdown.py PYTHON_PACKAGE --exclude=tests,test
-> 
->       # Step 5: Set version variable
->       - name: Set version variable
->         run: |
->           VERSION=${{ github.event.inputs.test_tag || github.event.release.tag_name }}
->           echo "VERSION=$VERSION" >> $GITHUB_ENV
-> 
->       # Step 6: Update switcher.json
->       - name: Update switcher.json
->         run: |
->           SWITCHER_FILE=_static/switcher.json
->           jq --arg version "$VERSION" \
->              '. |= [{"name": $version, "version": $version, "url": "https://ORGANIZATION.github.io/REPO/\($version)/"}] + .' \
->              $SWITCHER_FILE > temp.json && mv temp.json $SWITCHER_FILE
-> 
->       # Step 7: Build documentation using Sphinx into html
->       - name: Build documentation
->         env:
->           SPHINX_APIDOC_DIR: release-code
->         run: make html
-> 
->       # Step 8: Copy built HTML to `docs/latest` and `docs/{version}`
->       - name: Copy built HTML
->         run: |
->           mkdir -p docs/latest
->           mkdir -p docs/$VERSION
->           cp -r _build/html/* docs/latest/
->           cp -r _build/html/* docs/$VERSION/
-> 
->       # Step 9: Clean up `release-code` directory
->       - name: Remove release-code directory
->         run: rm -rf release-code
-> 
->       # Step 10: Commit and push changes
->       - name: Commit and push changes
->         run: |
->           git config user.name "github-actions[bot]"
->           git config user.email "github-actions[bot]@users.noreply.github.com"
->           git add docs/latest docs/$VERSION _static/switcher.json
->           git commit -m "Update docs for release $VERSION"
->           git push
-> ```
+- DT171 **[Deeplay Blocks](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT171_vlocks.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT171_vlocks.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
-## 8. Enable Write Permissions for GitHub Actions
-
-Ensure that GitHub Actions have write permissions to the repository following these steps:
-- Go to your repository on GitHub.
-- Navigate to Settings > Actions > General.
-- Scroll to the Workflow permissions section.
-- Select Read and write permissions.
-- Click Save.
+- DT181 **[Overview of Deeplay Internal Structure](https://github.com/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT181_internals.ipynb)** <a href="https://colab.research.google.com/github/DeepTrackAI/deeplay/blob/develop/tutorials/developers/DT181_internals.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"></a>
